@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1559b7" />
+  <title>InCheck Completion Dashboard</title>
+  <link rel="icon" href="assets/incheck-logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-lockup">
+        <img src="assets/incheck-logo.svg" alt="InCheck" class="logo" />
+        <div>
+          <div class="eyebrow">Customer Success Analytics</div>
+          <h1>Completion Dashboard</h1>
+          <p>Interactive standalone dashboard built with static demonstration data.</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span class="status-pill"><span class="status-dot"></span> Static data demo</span>
+        <button id="themeToggle" class="icon-button" type="button" aria-label="Toggle theme">◐</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="filter-panel no-print" aria-label="Dashboard filters">
+        <div class="filter-grid">
+          <label>
+            <span>Client</span>
+            <select id="clientFilter">
+              <option value="INDEPENDENT GROUP">INDEPENDENT GROUP</option>
+            </select>
+          </label>
+          <label>
+            <span>Review Type</span>
+            <select id="reviewTypeFilter">
+              <option value="Weekly">Weekly</option>
+              <option value="Monthly">Monthly</option>
+            </select>
+          </label>
+          <label>
+            <span>Period</span>
+            <select id="periodFilter"></select>
+          </label>
+          <label>
+            <span>Brand</span>
+            <select id="brandFilter"><option value="all">All Brands</option></select>
+          </label>
+          <label>
+            <span>Status</span>
+            <select id="statusFilter">
+              <option value="all">All Statuses</option>
+              <option value="Excellent">Excellent</option>
+              <option value="On Track">On Track</option>
+              <option value="Monitor">Monitor</option>
+              <option value="Needs Attention">Needs Attention</option>
+              <option value="No Data">No Data</option>
+            </select>
+          </label>
+          <label class="search-field">
+            <span>Search Location</span>
+            <input id="searchFilter" type="search" placeholder="Type a location name…" />
+          </label>
+        </div>
+        <div class="filter-actions">
+          <button id="resetButton" class="button button-secondary" type="button">Reset</button>
+          <button id="csvButton" class="button button-secondary" type="button">Export CSV</button>
+          <button id="printButton" class="button button-primary" type="button">Print / Save PDF</button>
+        </div>
+      </section>
+
+      <section class="context-strip">
+        <div><span>Client</span><strong id="contextClient">INDEPENDENT GROUP</strong></div>
+        <div><span>Review Type</span><strong id="contextReviewType">Weekly</strong></div>
+        <div><span>Period</span><strong id="contextPeriod">—</strong></div>
+        <div><span>Last refreshed</span><strong id="lastRefreshed">—</strong></div>
+      </section>
+
+      <section class="kpi-grid" id="kpiGrid" aria-label="Key performance indicators"></section>
+
+      <section class="dashboard-grid dashboard-grid-3">
+        <article class="card chart-card">
+          <div class="card-heading">
+            <div><span class="section-kicker">Average</span><h2>Overall Completion</h2></div>
+          </div>
+          <div class="donut-layout">
+            <div id="completionDonut" class="donut" role="img" aria-label="Completion donut chart">
+              <div class="donut-center"><strong id="donutValue">0.00%</strong><span>Completion</span></div>
+            </div>
+            <div class="legend-vertical">
+              <div><span class="legend-dot completion"></span><span>Completion</span><strong id="legendCompletion">0.00%</strong></div>
+              <div><span class="legend-dot remaining"></span><span>Remaining</span><strong id="legendRemaining">100.00%</strong></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="card chart-card">
+          <div class="card-heading">
+            <div><span class="section-kicker">Composition</span><h2>Completion Breakdown</h2></div>
+            <span class="mini-note">On-Time + Late = Completion</span>
+          </div>
+          <div class="stacked-track" id="stackedTrack" aria-label="Completion breakdown"></div>
+          <div class="axis"><span>0%</span><span>20%</span><span>40%</span><span>60%</span><span>80%</span><span>100%</span></div>
+          <div class="legend-grid" id="breakdownLegend"></div>
+        </article>
+
+        <article class="card summary-card">
+          <div class="card-heading">
+            <div><span class="section-kicker">Filtered scope</span><h2>All Client Locations</h2></div>
+          </div>
+          <p id="locationAverageText" class="muted">Average of 61 active locations</p>
+          <div class="metric-list" id="metricList"></div>
+          <div class="summary-total"><span><strong>Completion</strong><small>Done On-Time + Done Late</small></span><strong id="summaryCompletion">0.00%</strong></div>
+        </article>
+      </section>
+
+      <section class="dashboard-grid dashboard-grid-3 insights-row">
+        <article class="card insight-card">
+          <div class="insight-icon success">★</div>
+          <div><span class="section-kicker">Best performing location</span><h3 id="bestLocationName">—</h3><p id="bestLocationMeta">—</p></div>
+          <strong id="bestLocationValue">0.00%</strong>
+        </article>
+        <article class="card insight-card attention-card">
+          <div class="insight-icon warning">!</div>
+          <div><span class="section-kicker">Operational attention</span><h3 id="attentionCount">0 locations</h3><div id="attentionList" class="attention-list"></div></div>
+        </article>
+        <article class="card insight-card">
+          <div class="insight-icon info">i</div>
+          <div><span class="section-kicker">Data status</span><h3 id="dataStatusTitle">Static report snapshot</h3><p id="dataStatusText">—</p></div>
+        </article>
+      </section>
+
+      <section class="section-block">
+        <div class="section-header">
+          <div><span class="section-kicker">Brand level analysis</span><h2>Brand Completion Insights</h2><p>Completion by configured brand and sub-group.</p></div>
+        </div>
+        <div class="brand-kpis" id="brandKpis"></div>
+        <div class="dashboard-grid brand-layout">
+          <article class="card">
+            <div class="card-heading"><div><span class="section-kicker">Ranked performance</span><h2>Brand Performance</h2></div></div>
+            <div id="brandBars" class="brand-bars"></div>
+          </article>
+          <article class="card table-card brand-table-card">
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Brand / Sub-Group</th><th>Locations</th><th>On-Time</th><th>Late</th><th>Partial</th><th>Missed</th><th>Completion</th><th>Insight</th></tr></thead>
+                <tbody id="brandTableBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section-block">
+        <div class="section-header split-header">
+          <div><span class="section-kicker">Historical view</span><h2>Completion Trend</h2><p>Static weekly and monthly demo periods for interactive comparison.</p></div>
+          <div class="trend-summary"><span>Current vs previous</span><strong id="trendDelta">—</strong></div>
+        </div>
+        <article class="card trend-card">
+          <div id="trendChart" class="trend-chart" aria-label="Completion trend chart"></div>
+        </article>
+      </section>
+
+      <section class="section-block location-section">
+        <div class="section-header split-header">
+          <div><span class="section-kicker">Detailed records</span><h2>Location Completion Details</h2><p id="tableSubtitle">61 active locations</p></div>
+          <label class="page-size no-print"><span>Rows</span><select id="pageSizeSelect"><option>12</option><option>25</option><option>50</option><option>100</option></select></label>
+        </div>
+        <article class="card table-card">
+          <div class="table-wrap location-table-wrap">
+            <table id="locationTable">
+              <thead>
+                <tr>
+                  <th data-sort="rank">#</th>
+                  <th data-sort="brand">Brand</th>
+                  <th data-sort="name">Location</th>
+                  <th data-sort="onTime">Done On-Time</th>
+                  <th data-sort="late">Done Late</th>
+                  <th data-sort="partial">Partially Done</th>
+                  <th data-sort="missed">Missed</th>
+                  <th data-sort="completion">Completion</th>
+                  <th data-sort="status">Status</th>
+                </tr>
+              </thead>
+              <tbody id="locationTableBody"></tbody>
+            </table>
+          </div>
+          <div class="pagination no-print">
+            <span id="paginationInfo">—</span>
+            <div><button id="prevPage" class="button button-secondary" type="button">Previous</button><button id="nextPage" class="button button-secondary" type="button">Next</button></div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <span>InCheck 360 · Customer Success</span>
+      <span>Standalone static dashboard</span>
+    </footer>
+  </div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
